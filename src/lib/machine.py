@@ -2,13 +2,15 @@ import time
 from typing import Callable
 
 
-def run_machine_in_loop(func: Callable, memory: dict) -> None:
+def run_machine_in_loop(func: Callable,
+                        memory: dict,
+                        on_iteration_end: Callable) -> None:
     """
     Run a function in a loop.
     """
 
     while True:
-        func(memory)
-        time.sleep(1)
+        func(memory, on_iteration_end)
+        time.sleep(.01)
 
 

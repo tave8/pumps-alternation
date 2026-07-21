@@ -1,4 +1,8 @@
+from datetime import datetime
+from collections.abc import Callable
 from enum import Enum
+import csv
+import os
 
 from src.lib.machine import run_machine_in_loop
 from src.lib.pump_logic import decidi_se_attivare_o_disattivare_pompe
@@ -13,8 +17,9 @@ class StatoMacchina(Enum):
     DISATTIVA_ULTIMA_POMPA = 4
 
 
-def machine_func(M: dict):
+def machine_func(M: dict, on_iteration_end: Callable):
     """
+    :param on_iteration_end:
     :param M: machine memory - persists across iterations
     """
 
@@ -58,9 +63,21 @@ def machine_func(M: dict):
     print("tot pompe attive: ", M["tot_pompe_attive"])
     print("------------------------------")
 
-    # print("machine memory: ", M)
+    on_iteration_end(M)
 
 
+LOG_FILENAME = f"machine_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+def on_iteration_end_(M: dict):
+    file_esiste = os.path.isfile(LOG_FILENAME)
+    with open(LOG_FILENAME, "a", newline="") as f:
+        writer = csv.writer(f)
+        if not file_esiste:
+            writer.writerow(["stato", "livello_acqua", "tot_pompe_attive"])
+        writer.writerow([M["stato"], M["livello_acqua"], M["tot_pompe_attive"]])
+
+
+# MODIFICARE QUI
 
 run_machine_in_loop(machine_func, {
     "stato": StatoMacchina.INIT,
@@ -69,10 +86,12 @@ run_machine_in_loop(machine_func, {
         "attiva": False
     },
     "soglie": [
-        (60, 55),
-        (70, 65),
-        (80, 75),
-        (90, 85)
+        (40, 33),
+        (50, 43),
+        (60, 53),
+        (70, 63),
+        (80, 73),
+        (90, 83),
     ],
     "tot_pompe_attive": 0
-})
+}, on_iteration_end_)
