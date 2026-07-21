@@ -299,10 +299,10 @@ def test_data_TreSoglie_quando_LivelloAttualeETraSoglie_allora_TotPompeAttiveNec
     LIVELLO              |            |       |       |       | (76) |
     ATTUALE              |            |       |       |       |      |
                          |            |       |       |       |      |
-    MIN POMPE       0    |    0       |  1    |  1    |   2   |  3   |  3
+    MIN POMPE       0    |    0       |  1    |  1    |   2   |  2   |  3
     ATTIVE               |            |       |       |       |      |
                          |            |       |       |       |      |
-    MAX POMPE       0    |    1       |  1    |  2    |   2   |  2   |  3
+    MAX POMPE       0    |    1       |  1    |  2    |   2   |  3   |  3
     ATTIVE
 
     """
@@ -322,3 +322,124 @@ def test_data_TreSoglie_quando_LivelloAttualeETraSoglie_allora_TotPompeAttiveNec
     )
 
     assert tot_pompe_attive_necessarie_min == 3
+
+
+def test_data_QuattroSoglie_quando_LivelloAttualeETraSoglie_allora_TotPompeAttiveNecessarieMaxETre():
+    """
+                                      1 (60)          2 (70)                 3 (80)      4 (90)
+                                      |               |                      |           |
+    SOGLIE         -----------------------------------------------------------------------------
+    ATTIVAZ.                          |               |                      |           |
+                                      |               |                      |           |
+    SOGLIE         -----------------------------------------------------------------------------
+    DISATTIVAZ.          |            |       |       |       |  |    |      |           |
+                       1 (50)         |    2 (65)     |   3 (75) |   4(78)   |           |
+                         |            |       |       |       |  |    |      |           |
+    LIVELLO              |            |       |       |       | (76)  |      |           |
+    ATTUALE              |            |       |       |       |       |      |           |
+                         |            |       |       |       |       |      |           |
+    MIN POMPE       0    |    0       |  1    |  1    |   2   |   2   |  2   |   3       |   4
+    ATTIVE               |            |       |       |       |       |      |           |
+                         |            |       |       |       |       |      |           |
+    MAX POMPE       0    |    1       |  1    |  2    |   2   |   3   |  4   |   4       |   4
+    ATTIVE
+
+    """
+
+    livello_attuale = 76
+    soglie = [
+        (60, 50),
+        (70, 65),
+        (80, 75),
+        (90, 78)
+    ]
+    num_pompe_per_soglia = 1
+
+    tot_pompe_attive_necessarie_min = calcola_tot_pompe_attive_necessarie_max(
+        livello_attuale,
+        soglie,
+        num_pompe_per_soglia
+    )
+
+    assert tot_pompe_attive_necessarie_min == 3
+
+
+def test_data_QuattroSoglie_quando_LivelloAttualeETraSoglie_allora_TotPompeAttiveNecessarieMaxEQuattro():
+    """
+                                      1 (60)          2 (70)                    3 (80)      4 (90)
+                                      |               |                         |           |
+    SOGLIE         -----------------------------------------------------------------------------
+    ATTIVAZ.                          |               |                         |           |
+                                      |               |                         |           |
+    SOGLIE         -----------------------------------------------------------------------------
+    DISATTIVAZ.          |            |       |       |       |       |     |   |           |
+                       1 (50)         |    2 (65)     |   3 (75)     4(78)  |   |           |
+                         |            |       |       |       |       |     |   |           |
+    LIVELLO              |            |       |       |       |       |   (79)  |           |
+    ATTUALE              |            |       |       |       |       |         |           |
+                         |            |       |       |       |       |         |           |
+    MIN POMPE       0    |    0       |  1    |  1    |   2   |   2   |  2      |   3       |   4
+    ATTIVE               |            |       |       |       |       |         |           |
+                         |            |       |       |       |       |         |           |
+    MAX POMPE       0    |    1       |  1    |  2    |   2   |   3   |  4      |   4       |   4
+    ATTIVE
+
+    """
+
+    livello_attuale = 79
+    soglie = [
+        (60, 50),
+        (70, 65),
+        (80, 75),
+        (90, 78)
+    ]
+    num_pompe_per_soglia = 1
+
+    tot_pompe_attive_necessarie_min = calcola_tot_pompe_attive_necessarie_max(
+        livello_attuale,
+        soglie,
+        num_pompe_per_soglia
+    )
+
+    assert tot_pompe_attive_necessarie_min == 4
+
+
+
+def test_data_QuattroSoglie_quando_LivelloAttualeETraSoglie_allora_TotPompeAttiveNecessarieMaxEDue():
+    """
+                                      1 (60)          2 (70)                     3 (80)      4 (90)
+                                      |               |                          |           |
+    SOGLIE         -----------------------------------------------------------------------------
+    ATTIVAZ.                          |               |                          |           |
+                                      |               |                          |           |
+    SOGLIE         -----------------------------------------------------------------------------
+    DISATTIVAZ.          |            |       |       |  |     |       |         |           |
+                       1 (50)         |    2 (65)     |  |     3 (75)  4(78)     |           |
+                         |            |       |       |  |     |       |         |           |
+    LIVELLO              |            |       |       | (71)   |       |         |           |
+    ATTUALE              |            |       |       |        |       |         |           |
+                         |            |       |       |        |       |         |           |
+    MIN POMPE       0    |    0       |  1    |  1    |   2    |   2   |  2      |   3       |   4
+    ATTIVE               |            |       |       |        |       |         |           |
+                         |            |       |       |        |       |         |           |
+    MAX POMPE       0    |    1       |  1    |  2    |   2    |   3   |  4      |   4       |   4
+    ATTIVE
+
+    """
+
+    livello_attuale = 71
+    soglie = [
+        (60, 50),
+        (70, 65),
+        (80, 75),
+        (90, 78)
+    ]
+    num_pompe_per_soglia = 1
+
+    tot_pompe_attive_necessarie_min = calcola_tot_pompe_attive_necessarie_max(
+        livello_attuale,
+        soglie,
+        num_pompe_per_soglia
+    )
+
+    assert tot_pompe_attive_necessarie_min == 2
