@@ -1,4 +1,4 @@
-from src.main import decidi_se_attivare_o_disattivare_pompe
+from src.lib.pump_logic import decidi_se_attivare_o_disattivare_pompe
 
 
 def test_data_ZeroPompeAttive_quando_LivelloEIlPiuBasso_allora_NessunaDecisione():

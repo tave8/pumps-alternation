@@ -1,4 +1,4 @@
-from src.main import calcola_tot_pompe_attive_necessarie_max
+from src.lib.pump_logic import calcola_tot_pompe_attive_necessarie_max
 
 
 def test_data_UnaSoglia_quando_LivelloAttualeEInferioreASogliaPiuBassa_allora_TotPompeAttiveNecessarieMaxEZero():

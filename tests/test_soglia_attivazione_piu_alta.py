@@ -1,4 +1,4 @@
-from src.main import calcola_soglia_attivazione_piu_alta_raggiunta
+from src.lib.pump_logic import calcola_soglia_attivazione_piu_alta_raggiunta
 
 
 def test_data_UnaSoglia_quando_LivelloAttualeEInferioreASogliaPiuBassa_allora_SogliaAttivazionePiuAltaEZero():

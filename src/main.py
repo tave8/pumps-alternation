@@ -1,162 +1,78 @@
-def decidi_se_attivare_o_disattivare_pompe(livello_attuale: float,
-                                           soglie: list[tuple[float, float]],
-                                           tot_pompe_attive_adesso: int) -> tuple[bool, bool]:
+from enum import Enum
+
+from src.lib.machine import run_machine_in_loop
+from src.lib.pump_logic import decidi_se_attivare_o_disattivare_pompe
+from src.lib.utils import ottieni_livello_variato
+
+
+class StatoMacchina(Enum):
+    INIT = 0,
+    MACCHINA_ATTIVA = 1,
+    MACCHINA_FERMA = 2,
+    ATTIVA_PROSSIMA_POMPA = 3,
+    DISATTIVA_ULTIMA_POMPA = 4
+
+
+def machine_func(M: dict):
     """
-    L'ordine in cui vengono passate le soglia conta.
-    Si devono passare le soglie dalla più bassa alla più alta.
-    Esempio:
-        (60, 55)
-        (70, 65)
-        (80, 75)
-
-    Che rappresenta, concettualmente:
-
-        Soglia attivazione   |    Soglia disattivazione   |   Numero sequenziale (auto-assegnato)
-        ------------------------------------------------------------------------------------------
-             60                          55                        1
-             70                          65                        2
-             80                          75                        3
-
-
-    :param livello_attuale:
-    :param soglie:
-    :param tot_pompe_attive_adesso:
-    :return:
+    :param M: machine memory - persists across iterations
     """
 
-    num_pompe_per_soglia: int = 1
+    # Varia il livello dell'acqua casualmente
+    M["livello_acqua"] = ottieni_livello_variato(M["livello_acqua"], 0, 100)
 
-    # Il "seq" sta per "numero sequenza" e rappresenta
-    # un numero intero, internamente assegnato, che corrisponde alla soglia.
-    # La prima soglia ha numero sequenza 1, la seconda soglia ha numero sequenza 2, ecc.
+    match M["stato"]:
+        case StatoMacchina.INIT:
+            M["stato"] = StatoMacchina.MACCHINA_ATTIVA
+            print("macchina in stato iniziale")
 
+        case StatoMacchina.MACCHINA_ATTIVA:
+            decisione_attiva_pompa, decisione_disattiva_pompa = decidi_se_attivare_o_disattivare_pompe(
+                M["livello_acqua"],
+                M["soglie"],
+                M["tot_pompe_attive"]
+            )
 
-    # Il numero minimo di pompe attive necessarie è calcolato come
-    # la più alta soglia di attivazione raggiunta dal livello attuale (ad esempio il livello dell'acqua)
-    # moltiplicato il numero di pompe per ogni soglia.
-    # Considera il seguente scenario:
-    # - Ad ogni soglia di attivazione raggiunta, scatta 1 pompa
-    # - Il livello attuale ha raggiunto la soglia 2
-    # - C'è solo 1 pompa attiva
-    # La decisione è che va attivata una pompa.
+            if decisione_attiva_pompa:
+                M["stato"] = StatoMacchina.ATTIVA_PROSSIMA_POMPA
+            elif decisione_disattiva_pompa:
+                M["stato"] = StatoMacchina.DISATTIVA_ULTIMA_POMPA
 
-    poche_pompe_attive: bool = ci_sono_poche_pompe_attive(
-        livello_attuale,
-        soglie,
-        tot_pompe_attive_adesso,
-        num_pompe_per_soglia
-    )
+            print("macchina attiva")
 
-    troppe_pompe_attive: bool = ci_sono_troppe_pompe_attive(
-        livello_attuale,
-        soglie,
-        tot_pompe_attive_adesso,
-        num_pompe_per_soglia
-    )
+        case StatoMacchina.ATTIVA_PROSSIMA_POMPA:
+            M["pompaA"]["attiva"] = True
+            M["tot_pompe_attive"] += 1
 
-    # Si deve attivare una pompa solo se ci sono poche pompe attive
-    decisione_attiva_pompa: bool = poche_pompe_attive
-    # Si deve disattivare una pompa solo se ci sono troppo pompe attive
-    decisione_disattiva_pompa: bool = troppe_pompe_attive
+            M["stato"] = StatoMacchina.MACCHINA_ATTIVA
+            print("attivazione prossima pompa")
 
-    return decisione_attiva_pompa, decisione_disattiva_pompa
+        case StatoMacchina.DISATTIVA_ULTIMA_POMPA:
+            M["pompaA"]["attiva"] = False
+            M["tot_pompe_attive"] -= 1
+            M["stato"] = StatoMacchina.MACCHINA_ATTIVA
+            print("disattivazione ultima pompa")
 
 
-def ci_sono_poche_pompe_attive(livello_attuale: float,
-                               soglie: list[tuple[float, float]],
-                               tot_pompe_attive_adesso: int,
-                               num_pompe_per_soglia: int) -> bool:
+    print("livello acqua: ", M["livello_acqua"])
+    print("tot pompe attive: ", M["tot_pompe_attive"])
+    print("------------------------------")
 
-    tot_pompe_attive_necessarie_min = calcola_tot_pompe_attive_necessarie_min(
-        livello_attuale,
-        soglie,
-        num_pompe_per_soglia
-    )
-
-    return tot_pompe_attive_adesso < tot_pompe_attive_necessarie_min
-
-
-def ci_sono_troppe_pompe_attive(livello_attuale: float,
-                               soglie: list[tuple[float, float]],
-                               tot_pompe_attive_adesso: int,
-                               num_pompe_per_soglia: int) -> bool:
-
-    tot_pompe_attive_necessarie_max = calcola_tot_pompe_attive_necessarie_max(
-        livello_attuale,
-        soglie,
-        num_pompe_per_soglia
-    )
-
-    return tot_pompe_attive_adesso > tot_pompe_attive_necessarie_max
-
-
-def calcola_tot_pompe_attive_necessarie_min(livello_attuale: float,
-                                            soglie: list[tuple[float, float]],
-                                            num_pompe_per_soglia: int) -> int:
-
-    soglia_attivazione_piu_alta_raggiunta: int = calcola_soglia_attivazione_piu_alta_raggiunta(livello_attuale, soglie)
-
-    return soglia_attivazione_piu_alta_raggiunta * num_pompe_per_soglia
+    # print("machine memory: ", M)
 
 
 
-def calcola_tot_pompe_attive_necessarie_max(livello_attuale: float,
-                                            soglie: list[tuple[float, float]],
-                                            num_pompe_per_soglia: int) -> int:
-
-    soglia_disattivazione_piu_bassa_raggiunta: int = calcola_soglia_disattivazione_piu_bassa_raggiunta(livello_attuale, soglie)
-
-    return (soglia_disattivazione_piu_bassa_raggiunta - 1) * num_pompe_per_soglia
-
-
-
-def calcola_soglia_attivazione_piu_alta_raggiunta(livello_attuale: float,
-                                                 soglie: list[tuple[float, float]]) -> int:
-    """
-    :param livello_attuale:
-    :param soglie:
-    :return:
-    """
-    # Sequenza di soglia attivazione più alta raggiunta
-    seq_soglia_attivazione_piu_alta: int = 0
-
-    #     Da sinistra verso destra, quindi dalla soglia più bassa a quella più alta:
-    #     La più alta soglia di attivazione raggiunta è
-    #     la precedente della prima soglia di attivazione non raggiunta
-    for idx in range(len(soglie)):
-        (soglia_attivazione,
-         soglia_disattivazione) = soglie[idx]
-
-        # Se il livello attuale supera questa soglia attivazione,
-        # aggiorna la soglia attivazione più alta finora
-        if livello_attuale >= soglia_attivazione:
-            # "idx+1" significa "la sequenza della soglia attuale"
-            seq_soglia_attivazione_piu_alta = idx+1
-        # Alla prima volta che il livello attuale non supera una soglia attivazione,
-        # esci ritornando la soglia attivazione più alta finora
-        else:
-            break
-
-    return seq_soglia_attivazione_piu_alta
-
-
-def calcola_soglia_disattivazione_piu_bassa_raggiunta(livello_attuale: float,
-                                                     soglie: list[tuple[float, float]]) -> int:
-    # Sequenza di soglia disattivazione più bassa raggiunta
-    seq_soglia_disattivazione_piu_bassa: int = len(soglie)+1
-
-    #     Da sinistra verso destra, quindi dalla soglia più bassa a quella più alta:
-    #     La più bassa soglia di disattivazione raggiunta è
-    #     la prima soglia di disattivazione ad essere vera
-    for idx in range(len(soglie)):
-        (soglia_attivazione,
-         soglia_disattivazione) = soglie[idx]
-
-        # Se il livello attuale è minore di questa soglia disattivazione,
-        # aggiorna la soglia disattivazione ed esci subito
-        if livello_attuale < soglia_disattivazione:
-            # "idx+1" significa "la sequenza della soglia attuale"
-            seq_soglia_disattivazione_piu_bassa = idx+1
-            break
-
-    return seq_soglia_disattivazione_piu_bassa
+run_machine_in_loop(machine_func, {
+    "stato": StatoMacchina.INIT,
+    "livello_acqua": 70,
+    "pompaA": {
+        "attiva": False
+    },
+    "soglie": [
+        (60, 55),
+        (70, 65),
+        (80, 75),
+        (90, 85)
+    ],
+    "tot_pompe_attive": 0
+})

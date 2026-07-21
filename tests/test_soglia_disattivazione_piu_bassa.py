@@ -1,4 +1,4 @@
-from src.main import calcola_soglia_disattivazione_piu_bassa_raggiunta
+from src.lib.pump_logic import calcola_soglia_disattivazione_piu_bassa_raggiunta
 
 
 def test_data_UnaSoglia_quando_LivelloAttualeEInferioreASogliaPiuBassa_allora_SogliaDisattivazionePiuBassaEUno():
