@@ -1,22 +1,30 @@
-# Algoritmo di Alternanza Pompe basato su Isteresi
+# Algoritmo di soglie con isteresi
 
-Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al numero di pompe attive, ti dice se attivare o disattivare una pompa in ogni dato momento. [Ecco il codice](/src/lib/algo.py) 
+Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al numero di pompe attive, ti dice se attivare o disattivare una pompa in ogni dato momento. 
 
-[Vedi grafici](#grafici)
+- [Vedi grafici](#grafici)
+- [Vai alla simulazione](/src/simulation.py)
+- [Vai al codice](/src/lib/algo.py) 
+- [Come funziona la simulazione / modello di esecuzione PLC](#come-funziona-la-simulazione)
 
-L'idea è nata così:
+✅ Cosa promette: Un sistema più mantenibile, comprensibile e modularizzato grazie alla separazione della logica di decisione da quella di implementazione.
+   La modifica delle soglie, e quindi la configurazione, è una banalità. Non si deve ritoccare il codice sorgente. 
+   La decisione di attivazione / disattivazione pompa è una semplice chiamata di funzione.  
 
-- Tradurlo in PLC. Al momento in cui l'ho scritto, programmarlo subito in PLC mi sembrava un salto troppo grande.
-  Ho pensato di creare una versione funzionante, documentata e testata in Python, e solo dopo tradurlo in PLC. 
-  Motivo per cui ho mantenuto il codice molto basilare in termini di astrazione (evitando di proposito OOP), 
- proprio perché la facilità di traduzione Python -> PLC è un altro fattore che ho tenuto in considerazione.
+❌ Cosa non promette: Un'implementazione pronta all'uso. L'alternanza delle pompe con logiche di implementazione personalizzate. (Anche se viene comunque fornita una simulazione)
 
-- Generalizzare a N soglie. Invece che hardcodare i valori delle soglie. Ricontestualizzare la modifica delle soglie 
-  come dati che l'algoritmo riceve in ingresso - senza toccare il codice sorgente. 
+Cosa include il pacchetto:
 
-- Separare la decisione di attivazione / disattivazione pompe, dalla sua implementazione. Mi interessa sapere solo se attivare / disattivare pompa; 
-  Il "come" viene ricontestualizzato come problema di implementazione.
+- L'algoritmo vero e proprio. Questa è la logica pura, indipendente dagli altri componenti elencati.
 
+- Un'implementazione che permette di simularne il funzionamento, basata su macchina a stati, variazione casuale del livello d'acqua 
+  e una "memoria virtuale" che imita la memoria di un PLC (la memoria che sopravvive gli scan cycles). 
+
+- Un report in csv generato ad ogni fine simulazione, per poter analizzare come si comporta l'algoritmo nel tempo. 
+
+Nota: Per semplicità, c'è sola una pompa reale fornita. La complessità verrà aggiunta un po' alla volta quando ha senso.
+
+## Come funziona
 
 Vediamo meglio come funziona.
 
@@ -24,7 +32,7 @@ L'algoritmo non prende la decisione; dice solo se attivare o disattivare una pom
 
 Il tutto è stato pensato con una chiara separazione di responsabilità, modularità, testabilità e leggibilità. I passi dell'algoritmo possono anche essere eseguiti independentemente uno dall'altro.
 
-Re-itero: L'algoritmo ne' conosce ne' gli importa di come verrà implementato, quindi si ha libertà di implementazione.
+Re-itero: L'algoritmo ne' conosce ne' gli importa di come verrà implementato, quindi si ha libertà di implementazione. 
 
 Ecco gli input/output:
 
@@ -41,16 +49,22 @@ PROCEDURE decidi_se_attivare_o_disattivare_pompe
 
 ```
 
-Tuttavia, un algoritmo da solo non è molto pratico, serve metterlo alla prova. Infatti ci sono 3 componenti:
 
-- L'algoritmo vero e proprio. Questa è la logica pura, indipendente dagli altri componenti elencati.
+## Come è nata l'idea
 
-- Un'implementazione che permette di simularne il funzionamento, basata su macchina a stati, variazione casuale del livello d'acqua 
-  e una "memoria virtuale" che imita la memoria di un PLC (la memoria che sopravvive gli scan cycles). 
+L'idea è nata così:
 
-- Un report in csv generato ad ogni fine simulazione, per poter analizzare come si comporta l'algoritmo nel tempo. 
+- Tradurlo in PLC. Al momento in cui l'ho scritto, programmarlo subito in PLC mi sembrava un salto troppo grande.
+  Ho pensato di creare una versione funzionante, documentata e testata in Python, e solo dopo tradurlo in PLC. 
+  Motivo per cui ho mantenuto il codice molto basilare in termini di astrazione (evitando di proposito OOP), 
+ proprio perché la facilità di traduzione Python -> PLC è un altro fattore che ho tenuto in considerazione.
 
-Nota: Per semplicità, c'è sola una pompa reale fornita. La complessità verrà aggiunta un po' alla volta quando ha senso.
+- Generalizzare a N soglie. Invece che hardcodare i valori delle soglie. Ricontestualizzare la modifica delle soglie 
+  come dati che l'algoritmo riceve in ingresso - senza toccare il codice sorgente. 
+
+- Separare la decisione di attivazione / disattivazione pompe, dalla sua implementazione. Mi interessa sapere solo se attivare / disattivare pompa; 
+  Il "come" viene ricontestualizzato come problema di implementazione.
+
 
 ## Grafici
 
@@ -77,20 +91,50 @@ La simulazione si pone un obiettivo, che è quello di simulare un PLC.
 
 Per fare ciò, servono almeno due meccanismi: un scan cycle e una memoria che sopravvive gli scan cycles.
 
-La simulazione simula la "memoria di un PLC" attraverso un meccanismo furbo ma incredibilmente semplice; una semplice hashmap passata
-una sola volta in fase di inizio del loop, e poi ripassata ogni volta.
+La simulazione simula la "memoria di un PLC" attraverso un meccanismo furbo ma incredibilmente semplice; Una semplice hashmap passata una sola volta in fase di inizio del loop, e poi ripassata ogni volta ad ogni iterazione. 
 
-Essendo l'hashmap passata per riferimento, questo simula "la memoria che sopravvive gli scan cycles di un PLC".
+Essendo l'hashmap passata per riferimento, questo simula "la memoria che sopravvive gli scan cycles di un PLC", visto che si sta modificando lo stesso oggetto in memoria.
+
+L'intero codice implementativo viene raccolto in una "funzione macchina" da richiamare ad ogni iterazione. 
+
+Questa funzione macchina viene poi passata una funzione che la fa girare nel loop, poi aspetta un po', e poi la ri-esegue, e così via all'infinito fin quando non esci dal programma.
+
+Il codice nella funzione macchina è esattamente il codice che scrivi in PLC! 
+
+Per iniettare logiche custom in modo non-intrusivo, alla fine di ogni iterazione, viene eseguita una callback, che permette di eseguire azioni personalizzate come, ad esempio, fare un dump della "memoria del PLC" ad ogni fine iterazione, generando così un csv.
+
+Ecco il funzionamento in pseudo-codice.
+
+```
+
+machine_func(memoria):
+
+  // In questa funzione metti il codice che vuoi eseguire ad ogni iterazione.
+  
+  // Posso accedere alla "memoria del PLC"; la memoria persiste, quindi sarà accessibile alla prossima iterazione.
+  
+  // Un'implementazione con macchina a stati che scriveresti in PLC
+  
+  match memoria["stato"]:
+    
+    case StatoMacchina.INIZIO:
+    
+      memoria["stato"] = StatoMacchina.MACCHINA_AVVIATA
+    
+    case StatoMacchina.MACCHINA_AVVIATA
+    
+      // altra logica
+  
 
 
+// Passo la funzione macchina come argomento di un'altra funzione, che la eseguirà ad ogni iterazione.
+// Posso anche inizializzare la memoria del PLC
 
-- Memoria virtuale. Per simulare il meccanismo di "memoria che sopravvive alle iterazioni", 
-  viene passata una singola hashmap che la macchina può modificare. Essendo l'hashmap 
-  passata per riferimento dall'esterno, ogni modifica sopravvive alle iterazioni. 
+run_machine_in_loop(machine_func, {
+  "stato": StatoMacchina.INIZIO
+})
 
-- Csv a fine loop. Il csv contiene il dump delle principali variabili nella memoria virtuale, lette ad ogni fine iterazione.
-  Questo permette di analizzare come si comporta il sistema nel tempo.
-
+```
 
 
 ## Presupposti
@@ -98,26 +142,3 @@ Essendo l'hashmap passata per riferimento, questo simula "la memoria che sopravv
 - Soglia N Attivazione > Soglia N Disattivazione (Ogni soglia di attivazione è maggiore della corrispondente soglia di disattivazione)
 - Soglia N Attivazione > Soglia N-1 Attivazione (Ogni soglia di attivazione è maggiore della precedente soglia di attivazione)
 - Soglia N Disattivazione > Soglia N-1 Disattivazione (Ogni soglia di disattivazione è maggiore della precedente soglia di disattivazione)
-
-## Caratteristiche
-
-- Il sistema può attivare o disattivare una sola pompa alla volta per stato. 
-- Il sistema esegue un "dump" dei valori che vengono processati ad ogni iterazione
-
-
-
-## 
-
-    # Il "seq" sta per "numero sequenza" e rappresenta
-    # un numero intero, internamente assegnato, che corrisponde alla soglia.
-    # La prima soglia ha numero sequenza 1, la seconda soglia ha numero sequenza 2, ecc.
-
-
-    # Il numero minimo di pompe attive necessarie è calcolato come
-    # la più alta soglia di attivazione raggiunta dal livello attuale (ad esempio il livello dell'acqua)
-    # moltiplicato il numero di pompe per ogni soglia.
-    # Considera il seguente scenario:
-    # - Ad ogni soglia di attivazione raggiunta, scatta 1 pompa
-    # - Il livello attuale ha raggiunto la soglia 2
-    # - C'è solo 1 pompa attiva
-    # La decisione è che va attivata una pompa.
