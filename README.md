@@ -6,6 +6,7 @@ Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al 
 - [Vai alla simulazione](/src/simulation.py)
 - [Vai all'algoritmo](/src/lib/algo.py) 
 - [Come funziona la simulazione / modello di esecuzione PLC](#come-funziona-la-simulazione)
+- [Come ho ragionato: Vai a unit test](/tests/test_calcola_tot_pompe_attive_necessarie_max.py)
 
 ✅ Cosa promette: Un sistema più mantenibile, comprensibile e modularizzato grazie alla separazione della logica di decisione da quella di implementazione.
    La modifica delle soglie, e quindi la configurazione, è una banalità. Non si deve ritoccare il codice sorgente. 
