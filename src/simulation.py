@@ -5,7 +5,7 @@ import csv
 import os
 
 from src.lib.machine import run_machine_in_loop
-from src.lib.pump_logic import decidi_se_attivare_o_disattivare_pompe
+from src.lib.algo import decidi_se_attivare_o_disattivare_pompe
 from src.lib.utils import ottieni_livello_variato
 
 
@@ -66,7 +66,11 @@ def machine_func(M: dict, on_iteration_end: Callable):
     on_iteration_end(M)
 
 
-LOG_FILENAME = f"machine_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+REPORTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
+os.makedirs(REPORTS_DIR, exist_ok=True)
+
+LOG_FILENAME = os.path.join(REPORTS_DIR, f"machine_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
 
 def on_iteration_end_(M: dict):
     file_esiste = os.path.isfile(LOG_FILENAME)
@@ -81,17 +85,17 @@ def on_iteration_end_(M: dict):
 
 run_machine_in_loop(machine_func, {
     "stato": StatoMacchina.INIT,
-    "livello_acqua": 70,
+    "livello_acqua": 60,
     "pompaA": {
         "attiva": False
     },
     "soglie": [
-        (40, 33),
-        (50, 43),
-        (60, 53),
-        (70, 63),
-        (80, 73),
-        (90, 83),
+        (40, 25),
+        (50, 35),
+        (60, 40),
+        (70, 50),
+        (80, 60),
+        (90, 60),
     ],
     "tot_pompe_attive": 0
 }, on_iteration_end_)
