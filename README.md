@@ -1,6 +1,7 @@
-# Algoritmo di soglie con isteresi
+# Algoritmo di isteresi ad N soglie
 
 Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al numero di pompe attive, ti dice se attivare o disattivare una pompa in ogni dato momento. 
+
 
 - [Vedi grafici](#grafici)
 - [Vai alla simulazione](/src/simulation.py)
@@ -8,11 +9,16 @@ Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al 
 - [Come funziona la simulazione / modello di esecuzione PLC](#come-funziona-la-simulazione)
 - [Come ho ragionato: Vai a unit test](/tests/test_decidi_se_attivare_o_disattivare_pompe.py)
 
+
 ✅ Cosa promette: Un sistema più mantenibile, comprensibile e modularizzato grazie alla separazione della logica di decisione da quella di implementazione.
    La modifica delle soglie, e quindi la configurazione, è una banalità. Non si deve ritoccare il codice sorgente. 
    La decisione di attivazione / disattivazione pompa è una semplice chiamata di funzione.  
 
 ❌ Cosa non promette: Un'implementazione pronta all'uso. L'alternanza delle pompe con logiche di implementazione personalizzate. (Anche se viene comunque fornita una simulazione)
+
+In un ottica di componibilità in un sistema più complesso, ecco come potresti immaginarlo.
+
+![hysteresis algorithm](/media/hysteresis_algo.png)
 
 Cosa include il pacchetto:
 
