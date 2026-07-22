@@ -4,7 +4,7 @@ Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al 
 
 - [Vedi grafici](#grafici)
 - [Vai alla simulazione](/src/simulation.py)
-- [Vai al codice](/src/lib/algo.py) 
+- [Vai all'algoritmo](/src/lib/algo.py) 
 - [Come funziona la simulazione / modello di esecuzione PLC](#come-funziona-la-simulazione)
 
 ✅ Cosa promette: Un sistema più mantenibile, comprensibile e modularizzato grazie alla separazione della logica di decisione da quella di implementazione.
@@ -115,13 +115,13 @@ machine_func(memoria):
   
   // Un'implementazione con macchina a stati che scriveresti in PLC
   
-  match memoria["stato"]:
+  case memoria["stato"]:
     
-    case StatoMacchina.INIZIO:
+    StatoMacchina.INIZIO:
     
       memoria["stato"] = StatoMacchina.MACCHINA_AVVIATA
     
-    case StatoMacchina.MACCHINA_AVVIATA
+    StatoMacchina.MACCHINA_AVVIATA
     
       // altra logica
   
