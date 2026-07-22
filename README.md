@@ -4,8 +4,8 @@ Questo è un algoritmo che, in base a un livello raggiunto, a delle soglie e al 
 
 
 - [Vedi grafici](#grafici)
-- [Vai alla simulazione](/src/simulation.py)
-- [Vai all'algoritmo](/src/lib/algo.py) 
+- [Vai alla simulazione manuale (richiede ambiente in locale)](/src/simulation.py)
+- [Vai all'algoritmo](/src/algo.py) 
 - [Come funziona la simulazione / modello di esecuzione PLC](#come-funziona-la-simulazione)
 - [Come ho ragionato: Vai a unit test](/tests/test_decidi_se_attivare_o_disattivare_pompe.py)
 
@@ -30,6 +30,23 @@ Cosa include il pacchetto:
 - Un report in csv generato ad ogni fine simulazione, per poter analizzare come si comporta l'algoritmo nel tempo. 
 
 Nota: Per semplicità, c'è sola una pompa reale fornita. La complessità verrà aggiunta un po' alla volta quando ha senso.
+
+
+## Analisi complessità
+
+Complessità spazio: O(1)
+
+Complessità tempo: O(N), dove N = numero di soglie. Questo perché si itera sull'intera lista di soglie ad ogni chiamata. 
+
+L'algoritmo ha chiaramente una criticità; La sua complessità temporale non è ideale. 
+
+Il numero di soglie non dovrebbe essere tuttavia un collo di bottiglia, visto che si assume non solo che rimanga stabile nel tempo, 
+
+ma che siano poche, 10 soglie in totale dovrebbe essere ragionevole. 
+
+Ad ogni modo, visto quanto frequentemente è chiamato - praticamente ad ogni scan cycle - l'algoritmo dovrebbe avere una complessità migliore, idealmente O(1).
+
+Questa ottimizzazione richiederà un'analisi più approfondita e non è il momento di complicare le cose, senza una vera necessità. 
 
 ## Come funziona
 
@@ -86,10 +103,11 @@ L'idea è nata così:
 
 ## Come avviare la simulazione
 
-Per avviare la simulazione, ti basta eseguire il file [simulation.py](/src/simulation.py).
+Per avviare la simulazione, per adesso dovrai eseguire il file [simulation.py](/src/simulation.py) in locale.
 
-Si può facilmente regolare la velocità di esecuzione della simulazione (10, 100, ecc. giri al secondo), ma per semplicità, 
-ti basta tenerla attiva qualche secondo (anche 4 secondi vanno bene) per avere già centinaia di righe nel csv.
+In futuro potrò creare una simulazione interattiva.
+
+Si può facilmente regolare la velocità di esecuzione della simulazione (10, 100, ecc. giri al secondo), ma per semplicità, ti basta tenerla attiva qualche secondo (anche 4 secondi vanno bene) per avere già centinaia di righe nel csv.
 
 
 ## Come funziona la simulazione
@@ -142,7 +160,6 @@ run_machine_in_loop(machine_func, {
 })
 
 ```
-
 
 ## Presupposti
 

@@ -4,9 +4,9 @@ from enum import Enum
 import csv
 import os
 
-from src.lib.machine import run_machine_in_loop
-from src.lib.algo import decidi_se_attivare_o_disattivare_pompe
-from src.lib.utils import ottieni_livello_variato
+from src.machine import run_machine_in_loop
+from src.algo import decidi_se_attivare_o_disattivare_pompe
+from src.utils import ottieni_livello_variato
 
 
 class StatoMacchina(Enum):

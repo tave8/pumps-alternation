@@ -1,4 +1,4 @@
-from src.lib.algo import calcola_tot_pompe_attive_necessarie_min
+from src.algo import calcola_tot_pompe_attive_necessarie_min
 
 
 def test_data_UnaSoglia_quando_LivelloAttualeEInferioreASogliaPiuBassa_allora_TotPompeAttiveNecessarieMinEZero():
